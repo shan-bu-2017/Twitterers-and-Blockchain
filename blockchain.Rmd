@@ -1,11 +1,14 @@
 ---
-title: "blockchain"
+title: 'Blockchain on Twitter: A Sword of Damocles?'
 author: "Shan Shan"
 date: "12/18/2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
-### install.packages("googleVis"), install.packages("syuzhet")
+
+### Blockchain is the world's leading software platform for digital assets. Google Trends shows that Blockchain has a boost in the year 2017. What is Twitterers attitudes toward blockchain? My project analyzes Twitter data with the keyword blockchain from 2017 01 01 to 2017 12 18. To explore the brand perception of blockchain on Twitter, I have conducted word frequency analysis, sentiment analysis, and mapping analysis.
 
 
 
@@ -14,6 +17,7 @@ output: html_document
 #Set up Twitter
 
 library(reshape)
+library(reshape2)
 library(devtools)
 library(twitteR)
 library(tm)
@@ -34,17 +38,11 @@ library(igraph)
 library(streamR)
 ```
 
-```{r}
-#### Read the companion walkthrough here: prismoji.com/emoji-data-science-in-r-tutorial ####
 
-# set up Twitter Authentication
-library(twitteR)
-library(reshape)
-library(devtools)
-library(tidytext)
-```
+#### I. Read Twitter Data 
 
-## Connect to twitter api
+> * 1.1 Connect to Twitter API
+
 ```{r}
 api_key <- "Y9sY5tXFzxNGvUJYd1Um0Z1Ux"
 api_secret <- "HHnbEWbyLLuSqg3tvjPhYfl5HWQnzh2Jxxqo1ZbmVv8FgPrJWW"
@@ -56,21 +54,7 @@ setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
 ```
 
 
-```{r}
-library(ROAuth)
-requestURL <- "https://api.twitter.com/oauth/request_token"
-accessURL <- "https://api.twitter.com/oauth/access_token"
-authURL <- "https://api.twitter.com/oauth/authorize"
-consumerKey <- 	"LFNRqX5i1PkB69SjEEncXWloq"
-consumerSecret <- "4sDHqY6aLm7PRfJLxpq6GsWqphZxzX3dXLjssSLXYhO8wPwL3F"
-my_oauth <- OAuthFactory$new(consumerKey = consumerKey, consumerSecret = consumerSecret, 
-                             requestURL = requestURL, accessURL = accessURL, authURL = authURL)
-my_oauth$handshake(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"))
-save(my_oauth, file = "my_oauth.Rdata")
-```
-
-
-## read data
+>* 1.2 Read data
 
 ```{r}
 blch <- searchTwitter('blockchain',since='2017-01-01', until='2017-12-18',lang = "en", n=1000) %>% twListToDF()
@@ -79,11 +63,10 @@ head(blch)
 write.csv(blch, "blockchain.csv")
 ```
 
+#### II.Word Frequency Blockchain -- Sword of Damocles? 
 
+>* 2.1 Text Analysis of Top Words  (tokenize)
 
-## Text Analysis of Top Words
-
-### Word Frequency (tokenize)
 ```{r, include=FALSE}
 library(dplyr)
 library(tidytext)
@@ -108,7 +91,12 @@ tidy_blch%>%
   xlab(NULL) +
   coord_flip()
 ```
-### Sentiment Analysis
+
+>* 2.2 Sentiment Analysis
+>  sentiment analysis of positive and negtive words
+>  please refer to NRC Emotion Lexicon about the classification
+
+
 ```{r}
 get_sentiments("afinn")
 
@@ -118,8 +106,6 @@ get_sentiments("nrc")
 ```
 
 ```{r}
-# sentiment analysis of positive and negtive words
-# please refer to http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm about the classification
 
 nrcpos <- get_sentiments("nrc") %>% 
   filter(sentiment == "positive")
@@ -179,11 +165,16 @@ joylist %>%
   coord_flip() +
   scale_y_continuous(limits = c(0,60))
 ```
-From the twitters, the word "bonus" are mentioned over 60 time, indicating it is an important sentiment of people towards blockchain.
 
-The word "improvement" appeared over 30 times. This is also an important sentiment here. Some words like "disaster", and "caution" may indicate something about people's worry. 
+>* 2.3 Summary
 
-## sentiment analysis with bing
+>* From the Twitters, the word bonus are mentioned over 60 time, indicating it is an important sentiment of people towards blockchain.
+
+> * The word improvement appeared over 30 times. This is also an important sentiment here. Some words like disaster, and caution may indicate something about people's worry. 
+
+
+> * 2.4 Sentiment analysis with bing
+
 ```{r}
 bingpos <- get_sentiments("bing") %>% 
   filter(sentiment == "positive")
@@ -216,13 +207,18 @@ neglist %>%
   coord_flip() +
   scale_y_continuous(limits = c(0,110))
 ```
-From the twitters, the word "dark" are mentioned is 61 times, indicating it is an impressive negative sentiment of people towards blockchain.
 
-The word "bonus" appeared over 60 times. This is also an important sentiment here. 
+> * 2.5. Summary 
 
-Words like "glad", and "easier" may indicate something about people's expectaiton of blockchain. 
+>* From the Twitters, the word dark are mentioned is 61 times, indicating it is an impressive negative sentiment of people towards blockchain.
 
-Therefore, it seems that people holds a half-and-half attitudes towards blockchain.
+>* The word bonus appeared over 60 times. This is also an important sentiment here. 
+
+>* Words like glad, and easier" may indicate something about people's expectaiton of blockchain. 
+
+>* Therefore, it seems that people holds a half-and-half attitudes towards blockchain.
+
+> * 2.6 Wordcloud
 
 ```{r}
 library(wordcloud)
@@ -235,19 +231,21 @@ tidy_blch%>%
 
 
 ```{r}
-  tidy_blch%>%
+  tidy_blch %>%
   inner_join(get_sentiments("bing")) %>%
   count(word, sentiment, sort = TRUE) %>%
   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
   comparison.cloud(colors = c("#F8766D", "#00BFC4"),
-                   max.words = 500)
+                   max.words = 100)
 ```
 
 
 
-The cloud figure supports my former analysis that people holds a half-and-half attitudes towards blockchain.
+>* The cloud figure supports my former analysis that people holds a half-and-half attitudes towards blockchain.
 
-## A summit day?
+
+#### IV. A “summit” day– Dec 17 2017
+
 ```{r}
 # by date
 (dates <- blch%>%
@@ -263,7 +261,8 @@ ggplot() +
   ylab("Number of tweets") +
   scale_x_discrete(limits=lubridate::date(dates$date),labels=lubridate::date(dates$date))
 ```
-The number of tweets about blockchain in December 17 are higher than other dates.
+
+>* The number of tweets about blockchain in December 17 are higher than other dates.
 
 ```{r}
 # First 10 rows The tweets on dec 17
@@ -297,19 +296,10 @@ blch%>%
 
 ```
 
-#Where are the blockchain Twitterers? 
-```{r}
-load("my_oauth.Rdata")
-
-filterStream("tweetsUS.json", track=c("blockchain"), 
-             locations = c(-125, 25, -66,50),  timeout = 100,
-             oauth = my_oauth)   
-```
+#### V. Where are the blockchain Twitterers? 
 
 ```{r}
 load("my_oauth.Rdata")
-
-##map fot net a porter
 
 filterStream("blockchainmap.json", 
              track=c("blockchain"), 
@@ -343,4 +333,26 @@ ggplot(map.data) +
         aes(x = x, y = y), size = 1,  
         alpha = 1/5, color = "red")  
 ```
-The map displays that east part of U.S., such as New York; and the west part like California, have the most people twittering the blockchain topic
+
+>* The map displays that east part of U.S., such as New York; and the west part like California, have the most people twittering the blockchain topic
+
+
+#### General Findings
+
+> The sentiment analyses presents that some people regards blockchain as a improvement, while others regard it risky. 
+> In the negative chart, the word dark is mentioned is 35 times
+> In the positive chart, the positive word bonus is also mentioned around 35 times.   
+> The cloud text visualized this half-half attitude balance as well                                   Therefore, we could assume that people holds a half-and-half attitudes towards blockchain
+> The number of tweets about blockchain on December 17 reached the highest amount than other dates.
+> The map displays that east part of U.S., such as New York; and the west part like California, have the most people twittering the blockchain topic
+
+#### Links
+SHINY APP
+https://shshan.shinyapps.io/blockchain_on_twitter/
+
+GIT HUB
+https://github.com/shan-bu-2017/Twitterers-and-Blockchain.git
+
+
+
+
