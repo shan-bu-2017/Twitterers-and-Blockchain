@@ -37,16 +37,16 @@ tidy_data <-  data %>%
 # Define UI for application
 ui <- fluidPage(
   # Application title
-  titlePanel("Twitter Analysis of blockchain"),
+  titlePanel("Twitter Analysis of Blockchain:A Sword of Damocles?"),
   
   navbarPage(title="BLOCKCHAIN",
              tabPanel("Introduction",
                       h1("Project Introduction"),
                       br(), # space
                       hr(), # draw a line
-                      p("Blockchain is the world's leading software platform for digital assets . Google Trends shows that Blockchain has a boost in the year 2017
-                        How about Twitterers' attitudes toward blockchain? My project analyzes Twitter data with the keyword 'blockchain' from 2017-01-01 to 2017-12-18. To explore the brand perception of “blockchain” on Twitter. Word frequency analysis, sentiment analysis, mapping analysis are conducted for exploring people’s attitudes.
-"),
+                      p("My project analyzes Twitter data with the keyword Blockchain from 2017-01-01 to 2017-12-18. 
+To explore the brand perception of Blockchain on Twitter, I have conducted word frequency analysis, sentiment analysis, mapping analysis."),
+                        
                       img(src="blockchain.jpg",align="center"),
                       p("Pic source: https://hbr.org/2017/03/the-blockchain-will-do-to-banks-and-law-firms-what-the-internet-did-to-media?referral=03758&cm_vc=rr_item_page.top_right.shtml")
                       ),
@@ -63,14 +63,12 @@ ui <- fluidPage(
              ),
              tabPanel("Sword of Damocles?",
                       h1("Sentiment Analysis--Is Blockchain the Sword of Damocles? "),
-                      p("The sentiment analyses present that Some people regards Blockchain as a innovation 
-while others regard it risky. From the twitters, the word dark is mentioned is 61 times, indicating it is an impressive negative sentiment of people towards blockchain.
-
-                        The word bonus appeared over 60 times. This is also an important sentiment here. 
-                        
-                        Words like glad, and easier may indicate something about people's expectaiton of blockchain. 
-                        
-                        Therefore, it seems that people holds a half-and-half attitudes towards blockchain."),
+                      p("The sentiment analyses presents that some people regards blockchain as a improvement, while others regard it risky. 
+In the negative chart, the word dark is mentioned is 35 times
+                        In the positive chart, the positive word bonus is also mentioned around 35 times.   
+                        The cloud text visualized this half-half attitude balance as well                                                                               
+                        Therefore, we could assume that people holds a half-and-half attitudes towards blockchain
+                        ."),
                       fluidRow(
                         column(4,
                                plotOutput("wordcloud2")
@@ -94,8 +92,9 @@ while others regard it risky. From the twitters, the word dark is mentioned is 6
                                p(""),
                                p(""),
                                p("The number of tweets about blockchain on December 17 reached the highest amount than other dates.
-I used the criteria (created day of Twitter)
-Time span:  2017/01/01-2017/01/18
+I used the criteria “created day” of Twitter to calculate the number of tweets
+                                 Time span:  2017/01/01-2017/01/18
+                                 
 ")
                         ),
                         dataTableOutput("datetable")
