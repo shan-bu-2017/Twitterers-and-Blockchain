@@ -1,0 +1,288 @@
+Blockchain on Twitter: A Sword of Damocles?
+========================================================
+author: Shan Shan 
+date: Dec 18 2017
+autosize: true
+
+Blockchain
+========================================================
+
+
+- Blockchain is the world's leading software platform for digital assets 
+- Google Trends shows that Blockchain has a boost in the year 2017
+- What is Twitterers attitudes toward blockchain?
+
+***
+![Google Trends](GT.png)
+
+A Helicopter view 
+========================================================
+
+![](Twitter.png)
+***
+- My project analyzes Twitter data with the keyword 'blockchain' from 2017-01-01 to 2017-12-18. 
+- To explore the brand perception of “blockchain” on Twitter, I have conducted word frequency analysis, sentiment analysis, mapping analysis
+
+
+Blockchain -- Sword of Damocles?
+========================================================
+left:70%
+
+> WHAT IS PEOPLE’S ATTITUDES TOWARDS BLOCKCHAIN?
+
+- Some people regards Blockchain as a innovation : Blockchain: Shifting From Internet of Information to Internet of Value 
+
+- Some people regards Blockchain negatively and indicates its risks: The Dark Side of The Blockchain: What You Should Know About ICOs and the Ethereum Bubble
+
+***
+![](sword.png)
+
+
+```{r, include=FALSE}
+#Set up Twitter
+
+library(reshape)
+library(reshape2)
+library(devtools)
+library(twitteR)
+library(tm)
+library(stringr)
+library(wordcloud)
+library(tidytext)
+library(tidyverse)
+library(streamR)
+library(ROAuth)
+library(reshape)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(grid) 
+library(lubridate)
+library(graphTweets)
+library(igraph)
+library(streamR)
+```
+
+```{r, include=FALSE}
+api_key <- "Y9sY5tXFzxNGvUJYd1Um0Z1Ux"
+api_secret <- "HHnbEWbyLLuSqg3tvjPhYfl5HWQnzh2Jxxqo1ZbmVv8FgPrJWW"
+access_token <- "817556180717412352-nPKehdlSsJ0pdRzFI25uhzowIBMKqR7"
+access_token_secret <- "bWyPN9Xsi3kSmhlKlk0ls9cDosDcleYMpSSjkH7Q7WnHF"
+  
+setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
+
+blch <- searchTwitter('blockchain',since='2017-01-01', until='2017-12-18',lang = "en", n=1000) %>% twListToDF()
+
+write.csv(blch, "blockchain.csv")
+
+library(dplyr)
+library(tidytext)
+
+blch%>%
+  unnest_tokens(word, text)
+
+
+library(dplyr)
+library(tidytext)
+tidy_blch<- blch%>% unnest_tokens(word,text)
+
+tidy_blch%>%  count(word, sort=TRUE)
+
+tidy_blch%>% count(word, sort = TRUE) %>% 
+  filter(n>30) %>% 
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) + geom_col() + xlab(NULL) +coord_flip()
+
+get_sentiments("afinn")
+
+get_sentiments("bing")
+
+get_sentiments("nrc")
+
+
+nrcpos <- get_sentiments("nrc") %>% 
+  filter(sentiment == "positive")
+
+tidy_blch%>%
+  inner_join(nrcpos) %>%
+  count(word, sort = TRUE)
+
+
+nrcneg <- get_sentiments("nrc") %>% 
+  filter(sentiment == "negative")
+
+tidy_blch%>%
+  inner_join(nrcneg) %>%
+  count(word, sort = TRUE)
+
+nrcfear <- get_sentiments("nrc") %>% 
+  filter(sentiment == "fear")
+
+tidy_blch%>%
+  inner_join(nrcfear) %>%
+  count(word, sort = TRUE)
+
+nrcjoy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+tidy_blch%>%
+  inner_join(nrcjoy) %>%
+  count(word, sort = TRUE)
+
+
+
+(fearlist <- tidy_blch%>%
+  inner_join(nrcfear) %>%
+  count(word, sort = TRUE))
+
+(joylist <- tidy_blch%>%
+  inner_join(nrcjoy) %>%
+  count(word, sort = TRUE))
+
+fearlist %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col(fill="blue") +
+  xlab(NULL) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,60))
+
+joylist %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col(fill="red") +
+  xlab(NULL) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,60))
+
+bingpos <- get_sentiments("bing") %>% 
+  filter(sentiment == "positive")
+
+(poslist <- tidy_blch%>%
+  inner_join(bingpos) %>%
+  count(word, sort = TRUE))
+
+
+bingneg <- get_sentiments("bing") %>% 
+  filter(sentiment == "negative")
+
+(neglist <- (tidy_blch%>%
+  inner_join(bingneg)  %>%
+  count(word, sort = TRUE)))
+```
+
+Sentiment analysis with bing (positive list)
+========================================================
+
+```{r, echo=TRUE}
+poslist %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col(fill="red") +
+  xlab(NULL) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,110))
+
+```
+
+Sentiment analysis with bing (negtive list)
+========================================================
+
+```{r,echo=TRUE}
+neglist %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col(fill="blue") +
+  xlab(NULL) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,110))
+```
+
+Wordcloud 
+========================================================
+
+```{r, echo=TRUE}
+library(wordcloud)
+
+
+tidy_blch%>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+```
+
+
+Wordcloud (cont'd)
+========================================================
+
+```{r}
+  tidy_blch %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("#F8766D", "#00BFC4"),
+                   max.words = 100)
+```
+
+A “summit” day– Dec 17 2017 
+========================================================
+
+```{r}
+# by date
+(dates <- blch%>%
+  mutate(date=date(created)) %>%
+  group_by(date) %>%
+  summarise(date_n = n()))
+
+ggplot() +
+  geom_bar(data=dates, 
+           aes(date,date_n),
+           stat = "identity", 
+           fill="#f1801d") +
+  ylab("Number of tweets") +
+  scale_x_discrete(limits=lubridate::date(dates$date),labels=lubridate::date(dates$date))
+```
+
+
+Where are the blockchain twitterers?
+========================================================
+```{r, eval=FALSE, include=FALSE}
+load("my_oauth.Rdata")
+filterStream("blockchainmap.json", 
+             track=c("blockchain"), 
+             locations = c(-125, 25, -66,50), 
+             timeout=200, oauth=my_oauth)
+blockchainmap<-parseTweets("blockchainmap.json", verbose = TRUE)
+ck1 <- sum(blockchainmap$lat>0, na.rm = TRUE)
+ck2 <- sum(blockchainmap$place_lat>0, na.rm = TRUE)
+ck3 <- sum(!is.na(blockchainmap$location))
+map.data <- map_data("state")   
+netpoints <- data.frame(x = as.numeric(blockchainmap$lon),  
+                       y = as.numeric(blockchainmap$lat))
+netpoints <- netpoints[netpoints$y > 25, ]  
+netpoints<-filter(netpoints,y>19&y<65,x>(-161.7)&x<(-68.01))
+ggplot(map.data) + 
+  geom_map(aes(map_id = region),  
+           map = map.data,  
+           fill = "white",             
+           color = "grey20", size = 0.25) + 
+  expand_limits(x = map.data$long, y = map.data$lat) +            
+  theme(axis.line = element_blank(),  
+        axis.text = element_blank(),  
+        axis.ticks = element_blank(),                     
+        axis.title = element_blank(),  
+        panel.background = element_blank(),  
+        panel.border = element_blank(),                     
+        panel.grid.major = element_blank(), 
+        plot.background = element_blank(),                     
+        plot.margin = unit(0 * c( -1.5, -1.5, -1.5, -1.5), "lines")) +  
+        geom_point(data = netpoints,             
+        aes(x = x, y = y), size = 1,  
+        alpha = 1/5, color = "red")  
+```
+
+![18334 tweets have been parsed](map.png)
+
+***
+- The map displays that east part of U.S., such as New York; and the west part like California, have the most people twittering the blockchain topic
+
+
